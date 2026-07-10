@@ -54,67 +54,49 @@ h1,h2,h3,h4{font-family:'Poppins',sans-serif; margin:0;}
 a{color:inherit;}
 
 /* ================= LANDING (no navbar, distinct hero) ================= */
-@keyframes gradientShift{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-@keyframes titlePulse{
-  0%,100%{ filter:drop-shadow(0 6px 18px rgba(247,148,29,0.25)); }
-  50%{ filter:drop-shadow(0 10px 28px rgba(6,184,138,0.30)); }
-}
 .landing-page{
   min-height:100vh;width:100%;position:relative;overflow:hidden;
-  background:linear-gradient(120deg,#FFF8F0 0%,#FFE9CF 22%,#FDF6E3 45%,#E7FBF3 68%,#FFF3E0 100%);
-  background-size:300% 300%;
-  animation:gradientShift 16s ease infinite;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(247,148,29,0.30), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(247,148,29,0.16), transparent 45%),
+    radial-gradient(circle at 50% 95%, rgba(6,184,138,0.14), transparent 50%),
+    linear-gradient(160deg, #1a1a1c 0%, #2A2A2C 55%, #3A3A3C 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 24px;color:var(--ink);
+  padding:60px 24px;color:#fff;
 }
 .landing-page::before{
-  content:'';position:absolute;inset:0;opacity:0.12;
-  background-image:radial-gradient(circle,rgba(58,58,60,0.5) 1.5px,transparent 1.5px);
+  content:'';position:absolute;inset:0;opacity:0.06;
+  background-image:radial-gradient(circle,#fff 1.5px,transparent 1.5px);
   background-size:26px 26px;animation:drift 14s linear infinite;pointer-events:none;
 }
 .lp-blob{position:absolute;border-radius:50%;filter:blur(70px);animation:floatBlob 10s ease-in-out infinite;pointer-events:none;}
-.lp-blob1{width:380px;height:380px;background:rgba(247,148,29,0.35);top:-100px;left:-100px;}
-.lp-blob2{width:320px;height:320px;background:rgba(6,184,138,0.30);bottom:-110px;right:-70px;animation-delay:2s;}
-.lp-blob3{width:240px;height:240px;background:rgba(255,194,77,0.35);top:35%;right:8%;animation-delay:4s;}
+.lp-blob1{width:380px;height:380px;background:rgba(247,148,29,0.40);top:-100px;left:-100px;}
+.lp-blob2{width:320px;height:320px;background:rgba(6,184,138,0.28);bottom:-110px;right:-70px;animation-delay:2s;}
+.lp-blob3{width:240px;height:240px;background:rgba(255,194,77,0.30);top:35%;right:8%;animation-delay:4s;}
+.lp-logo-row{display:flex;align-items:center;gap:16px;margin-bottom:26px;z-index:2;animation:fadeUp .6s ease both;}
+.lp-logo-img{height:68px;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.35));background:#fff;padding:8px 14px;border-radius:14px;}
+.lp-brand{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:0.3px;color:#fff;}
 .lp-badge{
-  z-index:2;background:rgba(255,255,255,0.7);border:1.5px solid rgba(58,58,60,0.18);
+  z-index:2;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.35);
   padding:7px 18px;border-radius:999px;font-weight:700;font-size:0.78rem;letter-spacing:1px;
   text-transform:uppercase;margin-bottom:22px;animation:fadeUp .6s ease .05s both;backdrop-filter:blur(6px);
-  color:var(--navy-deep);
 }
-.lp-studio-title{
-  z-index:2;text-align:center;margin-bottom:8px;
-  font-family:'Poppins',sans-serif;font-weight:800;
-  font-size:clamp(2.6rem,8vw,5rem);line-height:1.02;letter-spacing:0.5px;
-  background:linear-gradient(90deg,var(--coral),var(--teal) 50%,var(--amber));
-  background-size:200% auto;
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  animation:fadeUp .6s ease .08s both, gradientShift 6s ease infinite, titlePulse 4s ease-in-out infinite;
-}
-.lp-logo-row{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:26px;z-index:2;animation:fadeUp .6s ease .14s both;text-decoration:none;cursor:pointer;}
-.lp-logo-img{height:54px;filter:drop-shadow(0 6px 14px rgba(58,58,60,0.18));background:#fff;padding:8px 14px;border-radius:14px;transition:transform .2s ease;}
-.lp-logo-row:hover .lp-logo-img{transform:scale(1.05);}
-.lp-brand{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;letter-spacing:0.3px;color:var(--navy-deep);}
 .lp-title{
-  z-index:2;font-size:clamp(1.6rem,4vw,2.3rem);text-align:center;line-height:1.15;margin-bottom:16px;
-  animation:fadeUp .6s ease .18s both;color:var(--navy-deep);font-weight:700;
+  z-index:2;font-size:clamp(2.2rem,6vw,3.6rem);text-align:center;line-height:1.08;margin-bottom:16px;
+  animation:fadeUp .6s ease .1s both;
 }
-.lp-title span{color:var(--coral-deep);}
+.lp-title span{color:var(--amber);}
 .lp-sub{
-  z-index:2;text-align:center;max-width:560px;font-weight:600;font-size:1.05rem;color:#5b5f78;
-  margin-bottom:44px;animation:fadeUp .6s ease .24s both;
+  z-index:2;text-align:center;max-width:560px;font-weight:600;font-size:1.05rem;color:rgba(255,255,255,0.82);
+  margin-bottom:44px;animation:fadeUp .6s ease .18s both;
 }
-.lp-btns{z-index:2;display:flex;gap:26px;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s ease .30s both;}
+.lp-btns{z-index:2;display:flex;gap:26px;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s ease .26s both;}
 .lp-card{
   background:rgba(255,255,255,0.98);border-radius:20px;padding:30px 32px;width:240px;text-align:center;
-  box-shadow:0 18px 40px rgba(58,58,60,0.14);transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
+  box-shadow:0 18px 40px rgba(0,0,0,0.25);transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease;
   border:none;
 }
-.lp-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 24px 50px rgba(58,58,60,0.20);}
+.lp-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 24px 50px rgba(0,0,0,0.32);}
 .lp-card .ic{
   width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;
   font-size:1.8rem;margin:0 auto 14px;
@@ -123,7 +105,7 @@ a{color:inherit;}
 .lp-card.navy .ic{background:rgba(58,58,60,0.12);}
 .lp-card h3{color:var(--navy-deep);font-size:1.15rem;margin-bottom:6px;}
 .lp-card p{margin:0;font-size:0.85rem;color:#79809c;font-weight:600;}
-.lp-foot{z-index:2;margin-top:50px;font-size:0.8rem;color:rgb(19, 19, 19);font-weight:700;animation:fadeUp .6s ease .3s both;}
+.lp-foot{z-index:2;margin-top:50px;font-size:0.8rem;color:rgba(255,255,255,0.6);font-weight:700;animation:fadeUp .6s ease .3s both;}
 
 /* ================= APP NAVBAR (only inside app/admin) ================= */
 .navbar{
@@ -132,7 +114,7 @@ a{color:inherit;}
   position:sticky;top:0;z-index:50;
 }
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer;}
-.nav-logo-img{height:54px;display:block;}
+.nav-logo-img{height:34px;display:block;}
 .nav-title{font-family:'Poppins',sans-serif;font-weight:600;font-size:1.2rem;color:var(--navy-deep);text-align:center;flex:1;}
 .nav-right{display:flex;align-items:center;gap:10px;}
 .pill-btn{
@@ -347,12 +329,11 @@ footer .heart{color:var(--coral);}
     <div class="lp-blob lp-blob1"></div>
     <div class="lp-blob lp-blob2"></div>
     <div class="lp-blob lp-blob3"></div>
-    <div class="lp-badge">ESP32 · Live Hardware Testing</div>
-    <h1 class="lp-studio-title">Sensor Testing Studio</h1>
-    <a class="lp-logo-row" href="https://www.cognospace.in" target="_blank" rel="noopener">
+    <div class="lp-logo-row">
       <img class="brand-logo-img lp-logo-img" alt="CognoSpace logo">
-      <span class="lp-brand">CognoSpace</span>
-    </a>
+      <span class="lp-brand">Sensor Testing Lab</span>
+    </div>
+    <div class="lp-badge">ESP32 · Live Hardware Testing</div>
     <h1 class="lp-title">Effortless sensor testing <span><br>built for instructors.</span></h1>
     <p class="lp-sub">Connect an ESP32 over USB, wire up your sensors, and watch live data stream straight into the browser — no installs, no fuss.</p>
     <div class="lp-btns">
@@ -432,9 +413,9 @@ footer .heart{color:var(--coral);}
     </div>
     <div class="table-scroll">
       <table class="log-table">
-        <thead><tr><th>#</th><th>Date</th><th>School</th><th>Educator</th><th>Logged In</th><th>Logged Out</th><th>Status</th><th>Components</th><th>Time Spent</th><th>🏆 Points</th></tr></thead>
+        <thead><tr><th>#</th><th>Date</th><th>School</th><th>Educator</th><th>Logged In</th><th>Logged Out</th><th>Status</th></tr></thead>
         <tbody id="logTableBody">
-          <tr><td colspan="10" style="text-align:center;color:#9298b5;">Loading records…</td></tr>
+          <tr><td colspan="7" style="text-align:center;color:#9298b5;">Loading records…</td></tr>
         </tbody>
       </table>
     </div>
@@ -530,16 +511,6 @@ footer .heart{color:var(--coral);}
   </div>
 </section>
 
-<!-- ============ SENSOR WIRING CAUTION MODAL ============ -->
-<div id="sensorCautionModal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <span class="emoji">⚠️</span>
-    <h3>Wiring Caution</h3>
-    <p id="sensorCautionMsg">Please use the push button (voltage divider) to connect this sensor.</p>
-    <button onclick="confirmSensorCaution()">Yes, I have connected.</button>
-  </div>
-</div>
-
 <!-- ============ THANK YOU / END SESSION MODAL ============ -->
 <div id="thankYouModal" class="modal-overlay hidden">
   <div class="modal-card">
@@ -615,7 +586,6 @@ let history = {};
 let currentSessionKey = null;
 let currentEducator = "";
 let currentSchool = "";
-let sessionComponentsTested = 0;
 
 let port, reader, writer, keepReading=false, serialConnected=false;
 
@@ -672,13 +642,11 @@ function launchSession(){
   errEl.textContent = "";
   currentEducator = educator;
   currentSchool = school;
-  sessionComponentsTested = 0;
   const record = {
     school, educator,
     date: document.getElementById('sessionDate').value,
     loginTime: Date.now(),
-    logoutTime: null,
-    componentsTested: 0
+    logoutTime: null
   };
   if(fbEnabled){
     const ref = db.ref('sessionLogs').push(record);
@@ -733,7 +701,7 @@ function adminLogout(){ showView('landing'); }
 function loadAdminTable(){
   const tbody = document.getElementById('logTableBody');
   if(!fbEnabled){
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9298b5;">Firebase is not configured yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9298b5;">Firebase is not configured yet.</td></tr>';
     return;
   }
   db.ref('sessionLogs').orderByChild('loginTime').once('value').then(snap=>{
@@ -742,29 +710,8 @@ function loadAdminTable(){
     allSessionRows.sort((a,b)=> (b.loginTime||0) - (a.loginTime||0));
     renderAdminTable();
   }).catch(err=>{
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--coral);">Could not load records: '+err.message+'</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--coral);">Could not load records: '+err.message+'</td></tr>';
   });
-}
-/* Points formula:
-   +2 pts per minute spent testing (capped at 60 min/session to avoid idle-tab abuse)
-   +5 pts per distinct component/sensor tested that session
-   +4 pts per session as a frequency bonus (rewards educators who come back and test often) */
-function computeEducatorFrequency(rows){
-  const freq = {};
-  rows.forEach(r=>{
-    const key = (r.educator||'').trim().toLowerCase();
-    freq[key] = (freq[key]||0) + 1;
-  });
-  return freq;
-}
-function computeSessionPoints(r, freqCount){
-  const minutesSpent = r.loginTime && r.logoutTime ? Math.max(0,(r.logoutTime - r.loginTime)/60000) : 0;
-  const cappedMinutes = Math.min(minutesSpent, 60);
-  const components = r.componentsTested || 0;
-  const timePts = Math.round(cappedMinutes * 2);
-  const componentPts = components * 5;
-  const frequencyPts = (freqCount||1) * 4;
-  return { minutesSpent, timePts, componentPts, frequencyPts, total: timePts + componentPts + frequencyPts };
 }
 function renderAdminTable(){
   const tbody = document.getElementById('logTableBody');
@@ -774,15 +721,10 @@ function renderAdminTable(){
     return (r.school||'').toLowerCase().includes(q) || (r.educator||'').toLowerCase().includes(q);
   });
   if(rows.length===0){
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9298b5;">No matching sessions found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9298b5;">No matching sessions found.</td></tr>';
     return;
   }
-  const freqMap = computeEducatorFrequency(allSessionRows);
-  tbody.innerHTML = rows.map((r,i)=>{
-    const freqCount = freqMap[(r.educator||'').trim().toLowerCase()] || 1;
-    const pts = computeSessionPoints(r, freqCount);
-    const timeLabel = r.logoutTime ? Math.round(pts.minutesSpent) + ' min' : '—';
-    return `
+  tbody.innerHTML = rows.map((r,i)=>`
     <tr>
       <td>${i+1}</td>
       <td>${r.date||''}</td>
@@ -791,11 +733,7 @@ function renderAdminTable(){
       <td>${r.loginTime ? new Date(r.loginTime).toLocaleString('en-IN') : '—'}</td>
       <td>${r.logoutTime ? new Date(r.logoutTime).toLocaleString('en-IN') : '—'}</td>
       <td>${r.logoutTime ? '<span class="tag-ended">Ended</span>' : '<span class="tag-active">Active</span>'}</td>
-      <td>${r.componentsTested||0}</td>
-      <td>${timeLabel}</td>
-      <td><b title="Time: ${pts.timePts} · Components: ${pts.componentPts} · Frequency (${freqCount} sessions): ${pts.frequencyPts}">${pts.total}</b></td>
-    </tr>`;
-  }).join('');
+    </tr>`).join('');
 }
 
 /* ============================================================
@@ -850,27 +788,10 @@ function onPinToggle(pin){
   sel.disabled = !chk.checked;
   card.classList.toggle('checked', chk.checked);
 }
-const CAUTION_SENSORS = new Set(['ir','ldr','soil','rain']);
-let pendingCautionPin = null;
 function onSensorPick(pin){
   const sel = document.getElementById('sel_'+pin);
-  if(sel.value && CAUTION_SENSORS.has(sel.value)){
-    pendingCautionPin = pin;
-    document.getElementById('sensorCautionMsg').textContent =
-      `Please use the push button (voltage divider) to connect the ${SENSOR_TYPES[sel.value].label}.`;
-    document.getElementById('sensorCautionModal').classList.remove('hidden');
-    return; // wait for confirmation before accepting
-  }
   if(sel.value) pinConfig[pin] = sel.value;
   else delete pinConfig[pin];
-}
-function confirmSensorCaution(){
-  if(pendingCautionPin!=null){
-    const sel = document.getElementById('sel_'+pendingCautionPin);
-    pinConfig[pendingCautionPin] = sel.value;
-    pendingCautionPin = null;
-  }
-  document.getElementById('sensorCautionModal').classList.add('hidden');
 }
 function renderPreview(){
   oledEnabled = document.getElementById('oledEnable').checked;
@@ -941,11 +862,6 @@ function savePins(){
   sendSerial(cfg);
   buildLiveDashboard();
   switchMode('live');
-  const count = Object.keys(pinConfig).length + (dedicatedChoice!=='none'?1:0) + (oledEnabled?1:0);
-  sessionComponentsTested = Math.max(sessionComponentsTested, count);
-  if(fbEnabled && currentSessionKey){
-    db.ref('sessionLogs/'+currentSessionKey).update({ componentsTested: sessionComponentsTested }).catch(err=>console.warn("Component count sync failed:", err));
-  }
 }
 
 /* ============================================================
