@@ -90,11 +90,13 @@ a{color:inherit;}
   z-index:2;text-align:center;margin-bottom:8px;
   font-family:'Poppins',sans-serif;font-weight:800;
   font-size:clamp(2.6rem,8vw,5rem);line-height:1.02;letter-spacing:0.5px;
-  color:var(--navy-deep);
-  animation:fadeUp .6s ease .08s both, titlePulse 4s ease-in-out infinite;
+  background:linear-gradient(90deg,var(--coral),var(--teal) 50%,var(--amber));
+  background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:fadeUp .6s ease .08s both, gradientShift 6s ease infinite, titlePulse 4s ease-in-out infinite;
 }
 .lp-logo-row{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:26px;z-index:2;animation:fadeUp .6s ease .14s both;text-decoration:none;cursor:pointer;}
-.lp-logo-img{height:76px;filter:drop-shadow(0 6px 14px rgba(58,58,60,0.18));background:#fff;padding:10px 18px;border-radius:16px;transition:transform .2s ease;}
+.lp-logo-img{height:54px;filter:drop-shadow(0 6px 14px rgba(58,58,60,0.18));background:#fff;padding:8px 14px;border-radius:14px;transition:transform .2s ease;}
 .lp-logo-row:hover .lp-logo-img{transform:scale(1.05);}
 .lp-brand{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;letter-spacing:0.3px;color:var(--navy-deep);}
 .lp-title{
@@ -131,10 +133,7 @@ a{color:inherit;}
 }
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer;}
 .nav-logo-img{height:54px;display:block;}
-.nav-title{
-  font-family:'Poppins',sans-serif;font-weight:700;font-size:1.5rem;color:var(--navy-deep);
-  position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;
-}
+.nav-title{font-family:'Poppins',sans-serif;font-weight:600;font-size:1.2rem;color:var(--navy-deep);text-align:center;flex:1;}
 .nav-right{display:flex;align-items:center;gap:10px;}
 .pill-btn{
   border:2px solid var(--navy); background:transparent; color:var(--navy);
@@ -155,9 +154,9 @@ a{color:inherit;}
   border-bottom:2px solid var(--line);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;
   flex-wrap:wrap;gap:10px;
 }
-.welcome-strip .wtext{font-weight:800;color:var(--navy-deep);font-family:'Poppins',sans-serif;font-size:1.5rem;}
+.welcome-strip .wtext{font-weight:800;color:var(--navy-deep);font-family:'Poppins',sans-serif;font-size:1.02rem;}
 .welcome-strip .wtext b{color:var(--coral);}
-.welcome-strip .wsub{font-size:1rem;color:#6b7090;font-weight:700;}
+.welcome-strip .wsub{font-size:0.8rem;color:#79809c;font-weight:700;}
 
 body > section{flex:1 0 auto;width:100%;}
 main{flex:1;width:100%;}
@@ -288,17 +287,11 @@ table.log-table tr:nth-child(even){background:#FBFAF6;}
 
 /* ---------- FOOTER ---------- */
 footer{
-  background:linear-gradient(90deg,var(--navy-deep),var(--navy) 55%,var(--navy-deep));
-  color:rgba(255,255,255,0.92);text-align:center;padding:18px 20px;font-weight:700;font-size:0.9rem;
-  width:100%;flex-shrink:0;border-top:3px solid var(--coral);
+  background:var(--navy-deep);color:#fff;text-align:center;padding:16px 20px;font-weight:700;font-size:0.85rem;
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;
+  width:100%;flex-shrink:0;row-gap:4px;
 }
-.footer-inner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;row-gap:4px;}
 footer .heart{color:var(--coral);}
-.footer-brand{
-  color:var(--amber);font-weight:800;text-decoration:none;letter-spacing:0.3px;
-  border-bottom:1.5px solid transparent;transition:color .15s ease, border-color .15s ease;
-}
-.footer-brand:hover{color:#fff;border-color:var(--coral);}
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:900px){
@@ -309,7 +302,7 @@ footer .heart{color:var(--coral);}
 
 @media(max-width:768px){
   .navbar{flex-wrap:wrap;row-gap:10px;padding:10px 16px;}
-  .nav-title{order:3;position:static;transform:none;flex-basis:100%;text-align:center;font-size:1.15rem;margin-top:2px;}
+  .nav-title{order:3;flex-basis:100%;text-align:center;font-size:1rem;margin-top:2px;}
   .nav-right{flex-wrap:wrap;justify-content:flex-end;gap:8px;}
   .welcome-strip{padding:10px 16px;flex-direction:column;align-items:flex-start;gap:4px;}
   .mode-tabs{padding:18px 12px 6px;flex-wrap:wrap;}
@@ -333,9 +326,8 @@ footer .heart{color:var(--coral);}
   .act-card{width:100%;}
   .dual-value-row{flex-direction:column;}
   .modal-card{padding:30px 24px;}
-  footer{font-size:0.78rem;padding:14px 16px;}
-  .footer-inner{flex-direction:column;gap:2px;}
-  .lp-logo-img{height:64px;padding:8px 12px;}
+  footer{font-size:0.78rem;padding:14px 16px;flex-direction:column;gap:2px;}
+  .lp-logo-img{height:52px;padding:6px 10px;}
   .lp-brand{font-size:1.25rem;}
 }
 
@@ -559,10 +551,7 @@ footer .heart{color:var(--coral);}
 </div>
 
 <footer id="mainFooter">
-  <div class="footer-inner">
-    <span>Designed &amp; Developed with</span><span class="heart">♥</span><span>by</span>
-    <a href="https://www.cognospace.in" target="_blank" rel="noopener" class="footer-brand">CognoSpace</a>
-  </div>
+  <span>Designed &amp; Developed with</span><span class="heart">♥</span><span>by CognoSpace</span>
 </footer>
 
 <script>
@@ -636,6 +625,7 @@ let port, reader, writer, keepReading=false, serialConnected=false;
 function showView(name){
   document.querySelectorAll('#view-landing, #view-educator-login, #view-admin-login, #view-admin, #view-app').forEach(s=>s.classList.add('hidden'));
   document.getElementById('view-'+name).classList.remove('hidden');
+  document.getElementById('mainFooter').classList.toggle('hidden', name==='landing');
 }
 showView('landing');
 
