@@ -6,6 +6,7 @@
 <title>CognoSpace Sensor Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -227,8 +228,10 @@ input[type=checkbox]{width:19px;height:19px;accent-color:var(--coral);cursor:poi
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .card-head h4{color:var(--navy-deep);font-size:1rem;}
 .card-head .pinno{font-family:'Inter',sans-serif;font-size:0.72rem;background:#F3ECDC;padding:2px 8px;border-radius:6px;color:#5B4C3C;}
+.viz-select{border:2px solid var(--line);border-radius:8px;padding:5px 8px;font-size:0.75rem;font-weight:700;background:#FFFDF8;color:var(--navy-deep);}
 .value-display{font-family:'Inter',sans-serif;font-size:2.1rem;font-weight:700;color:var(--navy-deep);text-align:center;padding:14px 0;}
 .value-unit{font-size:1rem;color:#5B4C3C;margin-left:4px;}
+.chart-wrap{height:140px;position:relative;}
 .sensor-error{display:flex;align-items:center;gap:8px;background:rgba(196,77,62,0.10);border:2px solid rgba(196,77,62,0.45);color:#A83E30;font-weight:800;font-size:0.85rem;padding:10px 12px;border-radius:12px;margin-top:8px;animation:fadeIn .3s ease both;}
 .sensor-error .dot-blink{width:8px;height:8px;border-radius:50%;background:#A83E30;flex:none;animation:pulse 1s infinite;}
 .card.has-error{border-color:rgba(196,77,62,0.55);}
@@ -627,6 +630,9 @@ let pinEnabled = new Set();
 let dedicatedChoice = "none";
 let dedicatedRoles = { trig:16, echo:17, clk:16, dio:17 };
 let oledEnabled = false;
+let vizChoice = {};
+let chartInstances = {};
+let history = {};
 let lastSeen = {};
 let sensorWatchdog = null;
 const SENSOR_TIMEOUT_MS = 5000; // how long to wait before flagging "no signal"
@@ -824,11 +830,6 @@ function switchMode(mode){
   document.getElementById('mode-setpin').classList.toggle('hidden', mode!=='setpin');
   document.getElementById('mode-live').classList.toggle('hidden', mode!=='live');
   if(mode==='setpin') renderPinGrid();
-  // Always rebuild the dashboard fresh from the current pin configuration when
-  // entering Live Mode, whether the user got here via Save or the tab itself.
-  // This guarantees newly added/removed sensors are reflected correctly and
-  // no stale watchdog timers or DOM nodes are left over from a previous build.
-  if(mode==='live') buildLiveDashboard();
 }
 
 /* ============================================================
@@ -976,8 +977,8 @@ function savePins(){
 function buildLiveDashboard(){
   const dash = document.getElementById('liveDash');
   dash.innerHTML = "";
-  // No chart instances to destroy anymore
-  chartInstances = {}; lastSeen = {};
+  Object.values(chartInstances).forEach(c=>c && c.destroy());
+  chartInstances = {}; history = {}; lastSeen = {};
   if(sensorWatchdog){ clearInterval(sensorWatchdog); sensorWatchdog = null; }
 
   const pins = Object.keys(pinConfig);
@@ -1027,6 +1028,7 @@ function buildCard(pin, type, cardIndex){
   card.className = 'card fade-up';
   card.style.animationDelay = ((cardIndex||0)*0.08)+'s';
   const cardId = 'card_'+pin.toString().replace('/','_');
+  history[pin] = [];
 
   if(meta.kind === 'actuator'){
     card.innerHTML = `
@@ -1082,35 +1084,72 @@ function buildCard(pin, type, cardIndex){
     return card;
   }
 
-  // Digital sensors (ir, button, rain, soil, ldr) → status display
-  // Ultrasonic → numeric value display
-  const isDigital = (meta.kind === 'digital');
+  const isAnalogLike = type==='ultrasonic';
+  const vizOptions = isAnalogLike
+    ? `<option value="value">Value</option><option value="gauge">Gauge</option><option value="line">Line Chart</option>`
+    : `<option value="status">On/Off</option><option value="line">Line Chart</option>`;
+  vizChoice[pin] = vizChoice[pin] || (type==='ultrasonic' ? 'value' : meta.defaultViz);
 
-  if(isDigital){
-    card.innerHTML = `
-      <div class="card-head">
-        <h4>${meta.label}</h4>
-        <span class="pinno">GPIO ${pin}</span>
-      </div>
-      <div class="status-dot-row" id="body_${cardId}">
-        <span class="status-led" id="led_${cardId}"></span>
-        <span id="txt_${cardId}" style="font-weight:800;color:#5B4C3C;">No data</span>
-      </div>
-      <div class="sensor-error hidden" id="err_${cardId}"><span class="dot-blink"></span>Error: No signal from sensor</div>
-    `;
-  } else {
-    // Analog / ultrasonic → value display
-    card.innerHTML = `
-      <div class="card-head">
-        <h4>${meta.label}</h4>
-        <span class="pinno">${type==='ultrasonic' ? 'GPIO '+dedicatedRoles.trig+'/'+dedicatedRoles.echo : 'GPIO '+pin}</span>
-      </div>
-      <div class="value-display" id="val_${cardId}">--<span class="value-unit">${meta.unit||''}</span></div>
-      <div class="sensor-error hidden" id="err_${cardId}"><span class="dot-blink"></span>Error: No signal from sensor</div>
-    `;
-  }
+  card.innerHTML = `
+    <div class="card-head">
+      <h4>${meta.label}</h4>
+      <span class="pinno">${type==='ultrasonic' ? 'GPIO '+dedicatedRoles.trig+'/'+dedicatedRoles.echo : 'GPIO '+pin}</span>
+    </div>
+    <select class="viz-select" onchange="setViz('${pin}', this.value)">
+      ${vizOptions}
+    </select>
+    <div id="body_${cardId}" style="margin-top:10px;"></div>
+    <div class="sensor-error hidden" id="err_${cardId}"><span class="dot-blink"></span>Error: No signal from sensor</div>
+  `;
+  renderCardBody(pin, cardId, type);
   lastSeen[pin] = Date.now();
   return card;
+}
+
+function setViz(pin, val){
+  vizChoice[pin] = val;
+  const cardId = 'card_'+pin.toString().replace('/','_');
+  renderCardBody(pin, cardId, pinConfig[pin]);
+}
+
+function renderCardBody(pin, cardId, type){
+  const body = document.getElementById('body_'+cardId);
+  if(!body) return;
+  const viz = vizChoice[pin];
+  if(viz === 'status'){
+    body.innerHTML = `<div class="status-dot-row"><span class="status-led" id="led_${cardId}"></span><span id="txt_${cardId}" style="font-weight:800;color:#5B4C3C;">No data</span></div>`;
+  } else if(viz === 'gauge'){
+    body.innerHTML = `<canvas id="gauge_${cardId}" width="200" height="120"></canvas>`;
+    drawGauge(cardId, 0, 50);
+  } else if(viz === 'line'){
+    body.innerHTML = `<div class="chart-wrap"><canvas id="chart_${cardId}"></canvas></div>`;
+    const ctx = document.getElementById('chart_'+cardId).getContext('2d');
+    chartInstances[pin] = new Chart(ctx, {
+      type:'line',
+      data:{ labels:[], datasets:[{ data:[], borderColor:'#C46B3E', backgroundColor:'rgba(196,107,62,0.10)', fill:true, tension:0.35, pointRadius:0 }]},
+      options:{ animation:false, responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{beginAtZero:true}} }
+    });
+  } else {
+    body.innerHTML = `<div class="value-display" id="val_${cardId}">--<span class="value-unit">${(SENSOR_TYPES[type]||{}).unit||''}</span></div>`;
+  }
+}
+
+function drawGauge(cardId, value, max){
+  const canvas = document.getElementById('gauge_'+cardId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h-10, r=80;
+  ctx.lineWidth = 14; ctx.lineCap='round';
+  ctx.strokeStyle = '#EDE4D2';
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI); ctx.stroke();
+  const pct = Math.min(1, Math.max(0, value/max));
+  ctx.strokeStyle = '#7A9B76';
+  ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,Math.PI+pct*Math.PI); ctx.stroke();
+  ctx.fillStyle = '#2B2118'; ctx.font="700 22px Fraunces"; ctx.textAlign='center';
+  ctx.fillText(value.toFixed(1), cx, cy-14);
 }
 
 /* ============================================================
@@ -1129,10 +1168,10 @@ function clearSensorError(pin){
 }
 
 function updateSensorValue(pinKey, val){
-  // DHT dual-value routing: keys arrive as "<pin>_t" and "<pin>_h"
+  // DHT dual-value routing
   if(typeof pinKey === 'string' && (pinKey.endsWith('_t') || pinKey.endsWith('_h'))){
     const basePin = pinKey.slice(0, -2);
-    const suffix = pinKey.slice(-1); // 't' or 'h'
+    const suffix = pinKey.slice(-1); // t or h
     const cardId = 'card_'+basePin.toString().replace('/','_');
     const el = document.getElementById('val_'+cardId+'_'+suffix);
     if(el){
@@ -1146,46 +1185,29 @@ function updateSensorValue(pinKey, val){
   const pin = pinKey;
   clearSensorError(pin);
   const cardId = 'card_'+pin.toString().replace('/','_');
-
-  // Determine sensor type — check pinConfig first, then dedicated sensor
-  const type = pinConfig[pin] || (pin==='16/17' ? dedicatedChoice : null);
-  if(!type) return;
-
-  const meta = SENSOR_TYPES[type];
-  const isDigital = meta && meta.kind === 'digital';
-
-  if(isDigital){
-    // Digital sensors: IR, button, rain, soil, ldr → status LED + text
+  const viz = vizChoice[pin];
+  const type = pinConfig[pin];
+  if(viz === 'status'){
     const led = document.getElementById('led_'+cardId);
     const txt = document.getElementById('txt_'+cardId);
-    if(led && txt){
-      // val=1 means signal active; val=0 means idle — EXCEPT the IR obstacle
-      // sensor, whose module is active-LOW (it pulls the line to 0 when an
-      // object is detected), so its "active" state must be inverted.
-      const rawHigh = (Number(val) !== 0);
-      const active = (type === 'ir') ? !rawHigh : rawHigh;
-      led.className = 'status-led ' + (active ? 'high' : 'low');
-      if(type === 'ir'){
-        txt.textContent = active ? 'Detected' : 'Clear';
-      } else if(type === 'button'){
-        txt.textContent = active ? 'Pressed' : 'Released';
-      } else if(type === 'rain'){
-        txt.textContent = active ? 'Rain Detected' : 'Dry';
-      } else if(type === 'soil'){
-        txt.textContent = active ? 'Wet' : 'Dry';
-      } else if(type === 'ldr'){
-        txt.textContent = active ? 'Light' : 'Dark';
-      } else {
-        txt.textContent = active ? 'HIGH / Detected' : 'LOW / Idle';
-      }
+    if(led){
+      led.className = 'status-led ' + (val ? 'high':'low');
+      txt.textContent = val ? 'HIGH / Detected' : 'LOW / Idle';
+    }
+  } else if(viz === 'gauge'){
+    drawGauge(cardId, val, 60);
+  } else if(viz === 'line'){
+    const h = history[pin] = history[pin] || [];
+    h.push(val); if(h.length>30) h.shift();
+    const chart = chartInstances[pin];
+    if(chart){
+      chart.data.labels = h.map((_,i)=>i);
+      chart.data.datasets[0].data = h;
+      chart.update('none');
     }
   } else {
-    // Analog/numeric sensors: ultrasonic, etc. → value display
     const el = document.getElementById('val_'+cardId);
-    if(el){
-      const unit = (meta && meta.unit) || '';
-      el.innerHTML = (typeof val==='number'? val.toFixed(1): val) + `<span class="value-unit">${unit}</span>`;
-    }
+    if(el) el.innerHTML = (typeof val==='number'? val.toFixed(1): val) + `<span class="value-unit">${(SENSOR_TYPES[type]||{}).unit||''}</span>`;
   }
 }
 
