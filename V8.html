@@ -271,23 +271,6 @@ table.log-table tr:last-child td{border-bottom:none;}
 table.log-table tr:nth-child(even){background:#F3ECDC;}
 .tag-active{background:rgba(88,113,86,0.15);color:#587156;font-weight:800;padding:3px 10px;border-radius:999px;font-size:0.75rem;}
 .tag-ended{background:#F3ECDC;color:#5B4C3C;font-weight:800;padding:3px 10px;border-radius:999px;font-size:0.75rem;}
-.admin-action-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
-.export-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:999px;border:2px solid var(--navy);background:transparent;color:var(--navy);font-weight:800;font-size:0.82rem;cursor:pointer;transition:all .15s ease;}
-.export-btn:hover{background:var(--navy);color:#fff;}
-.export-btn.excel{border-color:var(--teal);color:var(--teal);}
-.export-btn.excel:hover{background:var(--teal);color:#fff;}
-.delete-row-btn{background:none;border:none;cursor:pointer;color:#cc4433;font-size:1rem;padding:2px 7px;border-radius:6px;transition:background .12s;}
-.delete-row-btn:hover{background:rgba(196,77,62,0.12);}
-.coggy-overlay{position:fixed;inset:0;background:rgba(43,33,24,0.55);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
-.coggy-card{background:var(--card);border-radius:22px;padding:38px 34px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(43,33,24,0.3);animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;border:3px solid var(--coral);}
-.coggy-card .coggy-icon{font-size:3rem;margin-bottom:12px;display:block;}
-.coggy-card h3{color:var(--navy-deep);font-size:1.25rem;margin-bottom:10px;}
-.coggy-card p{color:#5B4C3C;font-weight:700;margin-bottom:24px;line-height:1.5;}
-.coggy-card .btn-row{display:flex;gap:12px;justify-content:center;}
-.coggy-card .coggy-connect-btn{background:var(--coral);color:#fff;border:none;padding:12px 28px;border-radius:999px;font-weight:800;font-size:0.95rem;cursor:pointer;transition:all .15s ease;}
-.coggy-card .coggy-connect-btn:hover{background:#A85830;}
-.coggy-card .coggy-skip-btn{background:transparent;border:2px solid var(--navy);color:var(--navy);padding:12px 22px;border-radius:999px;font-weight:800;font-size:0.95rem;cursor:pointer;transition:all .15s ease;}
-.coggy-card .coggy-skip-btn:hover{background:var(--navy);color:#fff;}
 
 /* ---------- THANK YOU MODAL ---------- */
 .modal-overlay{
@@ -456,15 +439,11 @@ footer .heart{color:var(--coral);}
         <input type="text" id="adminSearch" placeholder="Search school or educator…" oninput="renderAdminTable()">
       </div>
     </div>
-    <div class="admin-action-bar">
-      <button class="export-btn" onclick="exportAdminPDF()">📄 Export PDF</button>
-      <button class="export-btn excel" onclick="exportAdminExcel()">📊 Export Excel</button>
-    </div>
     <div class="table-scroll">
       <table class="log-table">
-        <thead><tr><th>#</th><th>Date</th><th>School</th><th>Educator</th><th>Logged In</th><th>Logged Out</th><th>Status</th><th>Components</th><th>Time Spent</th><th>🏆 Points</th><th>Delete</th></tr></thead>
+        <thead><tr><th>#</th><th>Date</th><th>School</th><th>Educator</th><th>Logged In</th><th>Logged Out</th><th>Status</th><th>Components</th><th>Time Spent</th><th>🏆 Points</th></tr></thead>
         <tbody id="logTableBody">
-          <tr><td colspan="11" style="text-align:center;color:#5B4C3C;">Loading records…</td></tr>
+          <tr><td colspan="10" style="text-align:center;color:#5B4C3C;">Loading records…</td></tr>
         </tbody>
       </table>
     </div>
@@ -577,19 +556,6 @@ footer .heart{color:var(--coral);}
     <h3 id="thankTitle">You're awesome!</h3>
     <p id="thankMsg">Thanks for testing with CognoSpace Sensor Lab.</p>
     <button onclick="closeThankYou()">Back to Home</button>
-  </div>
-</div>
-
-<!-- ============ COGGY (ESP32 not connected) POPUP ============ -->
-<div id="coggyModal" class="coggy-overlay hidden">
-  <div class="coggy-card">
-    <span class="coggy-icon">🤖</span>
-    <h3>Connect Coggy First!</h3>
-    <p>ESP32 (Coggy) is not connected yet. Please connect Coggy via USB before entering Live Mode so your sensors can be read in real time.</p>
-    <div class="btn-row">
-      <button class="coggy-connect-btn" onclick="connectAndGoLive()">🔌 Connect Coggy</button>
-      <button class="coggy-skip-btn" onclick="closeCoggyModal()">Cancel</button>
-    </div>
   </div>
 </div>
 
@@ -743,11 +709,6 @@ function launchSession(){
 }
 
 function endSession(){
-  // Block End Session if the educator hasn't tested any sensors yet
-  if(sessionComponentsTested === 0){
-    alert('⚠️ No sensor testing done yet!\n\nPlease configure at least one sensor in Set Pin Mode and go to Live Mode before ending the session.');
-    return;
-  }
   if(fbEnabled && currentSessionKey){
     db.ref('sessionLogs/'+currentSessionKey).update({ logoutTime: Date.now() }).catch(err=>console.warn("Logout stamp failed:", err));
   }
@@ -794,7 +755,7 @@ function loadAdminTable(){
   }
   db.ref('sessionLogs').orderByChild('loginTime').once('value').then(snap=>{
     allSessionRows = [];
-    snap.forEach(child=>{ const v=child.val(); v._fbKey=child.key; allSessionRows.push(v); });
+    snap.forEach(child=>{ allSessionRows.push(child.val()); });
     allSessionRows.sort((a,b)=> (b.loginTime||0) - (a.loginTime||0));
     renderAdminTable();
   }).catch(err=>{
@@ -830,7 +791,7 @@ function renderAdminTable(){
     return (r.school||'').toLowerCase().includes(q) || (r.educator||'').toLowerCase().includes(q);
   });
   if(rows.length===0){
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#5B4C3C;">No matching sessions found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#5B4C3C;">No matching sessions found.</td></tr>';
     return;
   }
   const freqMap = computeEducatorFrequency(allSessionRows);
@@ -838,7 +799,6 @@ function renderAdminTable(){
     const freqCount = freqMap[(r.educator||'').trim().toLowerCase()] || 1;
     const pts = computeSessionPoints(r, freqCount);
     const timeLabel = r.logoutTime ? Math.round(pts.minutesSpent) + ' min' : '—';
-    const key = r._fbKey || '';
     return `
     <tr>
       <td>${i+1}</td>
@@ -851,113 +811,14 @@ function renderAdminTable(){
       <td>${r.componentsTested||0}</td>
       <td>${timeLabel}</td>
       <td><b title="Time: ${pts.timePts} · Components: ${pts.componentPts} · Frequency (${freqCount} sessions): ${pts.frequencyPts}">${pts.total}</b></td>
-      <td style="text-align:center"><button class="delete-row-btn" title="Delete this record" onclick="deleteAdminRow('${key}')">🗑️</button></td>
     </tr>`;
   }).join('');
-}
-
-/* ============================================================
-   ADMIN — DELETE ROW
-   ============================================================ */
-function deleteAdminRow(key){
-  if(!key){ alert('Cannot delete: record key not found.'); return; }
-  if(!confirm('Delete this session record permanently?')) return;
-  if(fbEnabled){
-    db.ref('sessionLogs/'+key).remove().then(()=>{
-      allSessionRows = allSessionRows.filter(r=>r._fbKey!==key);
-      renderAdminTable();
-    }).catch(err=>alert('Delete failed: '+err.message));
-  } else {
-    allSessionRows = allSessionRows.filter(r=>r._fbKey!==key);
-    renderAdminTable();
-  }
-}
-
-/* ============================================================
-   ADMIN — EXPORT PDF (pure client-side via print)
-   ============================================================ */
-function exportAdminPDF(){
-  const rows = allSessionRows;
-  if(!rows.length){ alert('No records to export.'); return; }
-  const freqMap = computeEducatorFrequency(rows);
-  const tableRows = rows.map((r,i)=>{
-    const freqCount = freqMap[(r.educator||'').trim().toLowerCase()] || 1;
-    const pts = computeSessionPoints(r, freqCount);
-    const timeLabel = r.logoutTime ? Math.round(pts.minutesSpent) + ' min' : '—';
-    return `<tr>
-      <td>${i+1}</td><td>${r.date||''}</td><td>${r.school||''}</td><td>${r.educator||''}</td>
-      <td>${r.loginTime ? new Date(r.loginTime).toLocaleString('en-IN') : '—'}</td>
-      <td>${r.logoutTime ? new Date(r.logoutTime).toLocaleString('en-IN') : '—'}</td>
-      <td>${r.logoutTime ? 'Ended' : 'Active'}</td>
-      <td>${r.componentsTested||0}</td><td>${timeLabel}</td><td>${pts.total}</td>
-    </tr>`;
-  }).join('');
-  const win = window.open('','_blank','width=1100,height=700');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CognoSpace Session Records</title>
-  <style>
-    body{font-family:Arial,sans-serif;padding:24px;color:#222;}
-    h2{margin-bottom:18px;color:#2B2118;}
-    table{width:100%;border-collapse:collapse;font-size:0.8rem;}
-    th{background:#2B2118;color:#fff;padding:9px 10px;text-align:left;}
-    td{padding:8px 10px;border-bottom:1px solid #ddd;}
-    tr:nth-child(even){background:#f9f4ec;}
-    .gen{color:#777;font-size:0.75rem;margin-top:10px;}
-    @media print{body{padding:10px;} .no-print{display:none;}}
-  </style></head><body>
-  <h2>CognoSpace — Session Records</h2>
-  <table><thead><tr><th>#</th><th>Date</th><th>School</th><th>Educator</th><th>Logged In</th><th>Logged Out</th><th>Status</th><th>Components</th><th>Time Spent</th><th>Points</th></tr></thead>
-  <tbody>${tableRows}</tbody></table>
-  <p class="gen">Generated on ${new Date().toLocaleString('en-IN')}</p>
-  <button class="no-print" onclick="window.print()" style="margin-top:18px;padding:10px 24px;background:#C46B3E;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;">🖨️ Print / Save as PDF</button>
-  </body></html>`);
-  win.document.close();
-  setTimeout(()=>win.print(), 600);
-}
-
-/* ============================================================
-   ADMIN — EXPORT EXCEL (CSV download → opens in Excel)
-   ============================================================ */
-function exportAdminExcel(){
-  const rows = allSessionRows;
-  if(!rows.length){ alert('No records to export.'); return; }
-  const freqMap = computeEducatorFrequency(rows);
-  const esc = v => '"' + String(v||'').replace(/"/g,'""') + '"';
-  const header = ['#','Date','School','Educator','Logged In','Logged Out','Status','Components','Time Spent','Points'];
-  const csvRows = rows.map((r,i)=>{
-    const freqCount = freqMap[(r.educator||'').trim().toLowerCase()] || 1;
-    const pts = computeSessionPoints(r, freqCount);
-    const timeLabel = r.logoutTime ? Math.round(pts.minutesSpent) + ' min' : '';
-    return [
-      i+1,
-      esc(r.date||''),
-      esc(r.school||''),
-      esc(r.educator||''),
-      esc(r.loginTime ? new Date(r.loginTime).toLocaleString('en-IN') : ''),
-      esc(r.logoutTime ? new Date(r.logoutTime).toLocaleString('en-IN') : ''),
-      esc(r.logoutTime ? 'Ended' : 'Active'),
-      r.componentsTested||0,
-      esc(timeLabel),
-      pts.total
-    ].join(',');
-  });
-  const csv = '\uFEFF' + [header.map(esc).join(','), ...csvRows].join('\r\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'cognospace_sessions.csv';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
 /* ============================================================
    MODE SWITCH (Set Pin / Live)
    ============================================================ */
-function switchMode(mode, skipConnCheck){
-  // Guard: show Coggy popup if trying to enter Live Mode without ESP32
-  if(mode==='live' && !serialConnected && !skipConnCheck){
-    document.getElementById('coggyModal').classList.remove('hidden');
-    return;
-  }
+function switchMode(mode){
   document.getElementById('tabSetPin').classList.toggle('active', mode==='setpin');
   document.getElementById('tabLive').classList.toggle('active', mode==='live');
   document.getElementById('mode-setpin').classList.toggle('hidden', mode!=='setpin');
@@ -968,19 +829,6 @@ function switchMode(mode, skipConnCheck){
   // This guarantees newly added/removed sensors are reflected correctly and
   // no stale watchdog timers or DOM nodes are left over from a previous build.
   if(mode==='live') buildLiveDashboard();
-}
-
-/* ============================================================
-   COGGY CONNECT POPUP
-   ============================================================ */
-function closeCoggyModal(){
-  document.getElementById('coggyModal').classList.add('hidden');
-}
-async function connectAndGoLive(){
-  closeCoggyModal();
-  await toggleSerial();           // trigger the browser serial connect flow
-  // after connection attempt, switch to live regardless (user can see status chip)
-  switchMode('live', true);
 }
 
 /* ============================================================
@@ -1114,7 +962,7 @@ function savePins(){
   };
   sendSerial(cfg);
   buildLiveDashboard();
-  switchMode('live', true); // skip conn check — user pressed Save, already in session
+  switchMode('live');
   const count = Object.keys(pinConfig).length + (dedicatedChoice!=='none'?1:0) + (oledEnabled?1:0);
   sessionComponentsTested = Math.max(sessionComponentsTested, count);
   if(fbEnabled && currentSessionKey){
