@@ -650,7 +650,7 @@ const SENSOR_TYPES = {
   servo:     { label:"Servo Motor",         unit:"°",   kind:"actuator",defaultViz:"slider" },
   soil:      { label:"Soil Moisture Sensor",unit:"",    kind:"digital", defaultViz:"status" },
   ldr:       { label:"LDR Sensor",          unit:"",    kind:"digital", defaultViz:"status" },
-  ultrasonic:{ label:"Ultrasonic Sensor",   unit:"cm",  kind:"analog",  defaultViz:"value" },
+  ultrasonic:{ label:"Ultrasonic Sensor",   unit:"cm",  kind:"digital", defaultViz:"value" },
   display4:  { label:"4-Digit Display",     unit:"",    kind:"display", defaultViz:"none" },
   oled:      { label:"OLED Display",        unit:"",    kind:"display", defaultViz:"none" }
 };
@@ -1315,7 +1315,7 @@ function updateSensorValue(pinKey, val){
       // sensor, whose module is active-LOW (it pulls the line to 0 when an
       // object is detected), so its "active" state must be inverted.
       const rawHigh = (Number(val) !== 0);
-      const active = (type === 'ir' || type === 'ldr') ? !rawHigh : rawHigh;
+      const active = (type === 'ir') ? !rawHigh : rawHigh;
       led.className = 'status-led ' + (active ? 'high' : 'low');
       if(type === 'ir'){
         txt.textContent = active ? 'Detected' : 'Clear';
